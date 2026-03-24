@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Squirrel Game FIXED</title>
+
+<style>
+body {
+    margin: 0;
+    overflow: hidden;
+    background: linear-gradient(skyblue, lightgreen);
+}
+
+#gameArea {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+}
+
+#squirrel {
+    position: absolute;
+    bottom: 20px;
+    left: 50px;
+    width: 100px;
+}
+
+#enemy {
+    position: absolute;
+    bottom: 20px;
+    right: 50px;
+    width: 100px;
+}
+
+.peanut {
+    position: absolute;
+    top: 0;
+    width: 40px;
+}
+
+#score {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 20px;
+    background: white;
+    padding: 5px;
+}
+</style>
+
+</head>
+
+<body>
+
+<div id="gameArea">
+    <img id="squirrel" src="jay.png">
+    <img id="enemy" src="dog.png">
+    <div id="score">Score: 0</div>
+</div>
+
+<script>
+
+let squirrel = document.getElementById("squirrel");
+let enemy = document.getElementById("enemy");
+let gameArea = document.getElementById("gameArea");
+let score = 0;
+let gameOver = false;
+
+
+// 🎮 Movement FIXED
+document.addEventListener("keydown", function(e) {
+
+    if (gameOver) return; // stop only after game over
+
+    let left = squirrel.offsetLeft;
+
+    if (e.key === "ArrowRight") {
+        squirrel.style.left = left + 20 + "px";
+    }
+
+    if (e.key === "ArrowLeft") {
+        squirrel.style.left = left - 20 + "px";
+    }
+});
+
+
+// 🥜 Peanut
+function createPeanut() {
+
+    if (gameOver) return;
+
+    let peanut = document.createElement("img");
+    peanut.src = "peanut.png";
+    peanut.classList.add("peanut");
+
+    peanut.style.left = Math.random() * window.innerWidth + "px";
+    gameArea.appendChild(peanut);
+
+    let fall = setInterval(() => {
+
+        if (gameOver) {
+            peanut.remove();
+            clearInterval(fall);
+            return;
+        }
+
+        let top = peanut.offsetTop;
+        peanut.style.top = top + 5 + "px";
+
+        let s = squirrel.getBoundingClientRect();
+        let p = peanut.getBoundingClientRect();
+
+        if (
+            p.left < s.right &&
+            p.right > s.left &&
+            p.top < s.bottom &&
+            p.bottom > s.top
+        ) {
+            score++;
+            document.getElementById("score").innerText = "Score: " + score;
+            peanut.remove();
+            clearInterval(fall);
+        }
+
+        if (top > window.innerHeight) {
+            peanut.remove();
+            clearInterval(fall);
+        }
+
+    }, 20);
+}
+
+setInterval(createPeanut, 1000);
+
+
+// 🐶 Enemy
+setInterval(() => {
+
+    if (gameOver) return;
+
+    let pos = enemy.offsetLeft;
+    enemy.style.left = pos - 5 + "px";
+
+    if (pos < 0) {
+        enemy.style.left = window.innerWidth + "px";
+    }
+
+    let s = squirrel.getBoundingClientRect();
+    let e = enemy.getBoundingClientRect();
+
+    if (
+        e.left < s.right &&
+        e.right > s.left &&
+        e.top < s.bottom &&
+        e.bottom > s.top
+    ) {
+        document.getElementById("score").innerText = "Game Over! Score: " + score;
+        gameOver = true;
+    }
+
+}, 30);
+
+</script>
+
+</body>
+</html>
